@@ -11,7 +11,7 @@ namespace BoardUtils
 
         for (size_t x = 0; x < board.grid[0].size(); ++x)
         {
-            int displayX = static_cast<int>(x + 1);
+            int displayX = x + 1;
             std::cout << (displayX < 10 ? " " : "") << displayX << " ";
         }
         std::cout << '\n';
@@ -31,8 +31,8 @@ namespace BoardUtils
             return false;
         }
 
-        int displayX = static_cast<int>(x + 1);
-        int displayY = static_cast<int>(y + 1);
+        int displayX = x + 1;
+        int displayY = y + 1;
 
         for (Mine const &mine : player.mines)
         {
@@ -52,7 +52,7 @@ namespace BoardUtils
             return;
         }
 
-        int displayY = static_cast<int>(y + 1);
+        int displayY = y + 1;
         std::cout << (displayY < 10 ? " " : "") << displayY << "| ";
 
         for (size_t x = 0; x < board.grid[y].size(); ++x)
@@ -63,7 +63,7 @@ namespace BoardUtils
             }
             else
             {
-                std::cout << board.grid[y][x].getCellSymbol() << "  ";
+                std::cout << getCellSymbol(board.grid[y][x]) << "  ";
             }
         }
         std::cout << '\n';

@@ -6,6 +6,7 @@
 
 namespace Init
 {
+    //ver lo de poner el numero de mina en el placement
     static constexpr int kMinBoardSize = 24;
     static constexpr int kMaxBoardSize = 50;
     static constexpr int kMinMines = 3;
@@ -62,7 +63,7 @@ namespace Init
         int indexX = x - 1;
         int indexY = y - 1;
 
-        if (board.grid[indexY][indexX].isCellTaken())
+        if (isCellTaken(board.grid[indexY][indexX]))
         {
             std::cout << "That cell is taken from a previous guess. Try again.\n";
             return false;
@@ -98,7 +99,7 @@ namespace Init
         {
             int x = 0;
             int y = 0;
-
+            std::cout << "\nPlacing mine #" << (player.mines.size() + 1) << " of " << player.remainingMines << "\n";
             if (!getMineCoordinates(x, y, maxX, maxY))
             {
                 std::cout << "Invalid position. Try again.\n";

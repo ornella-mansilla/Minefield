@@ -33,21 +33,16 @@ void guess(Player& player, int& guesses, Game& game)
 {
     std::cout << "Player " << player.id << ": You have " << guesses << " guesses. \n";
 
-        while (player.guesses.size() < static_cast<size_t>(guesses))
+    while (player.guesses.size() < static_cast<size_t>(guesses))
     {
         int x = 0;
         int y = 0;
-
+        std::cout << "\nGuess #" << (player.guesses.size() + 1) << " of " << guesses << "\n";
         if (!getGuessCoordinates(x, y, game.context.board))
         {
             std::cout << "Invalid guess location. Try again.\n";
             continue;
         }
-        {
-            std::cout << "Invalid guess location. Try again.\n";
-                continue;
-        }
-
         Cell guess{x, y, CellStatus::Guess};
 
         if (!isDuplicateGuess(player, guess))
@@ -63,8 +58,8 @@ void GuessingState::handle(Game& game)
     game.context.player1.guesses.clear();
     game.context.player2.guesses.clear();
 
-    int guesses1 = game.context.player1.mines.size();
-    int guesses2 = game.context.player2.mines.size();
+    int guesses1 = game.context.player2.mines.size();
+    int guesses2 = game.context.player1.mines.size();
 
     guess(game.context.player1, guesses1, game);
     guess(game.context.player2, guesses2, game);

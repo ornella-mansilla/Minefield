@@ -83,7 +83,7 @@ void processGuesses(std::string const &attackerName, Player &attacker, Player &d
     {
         int gx = guess.x - 1;
         int gy = guess.y - 1;
-        board.grid[gy][gx].setStatus(CellStatus::Taken);
+        board.grid[gy][gx].status = CellStatus::Taken;
     }
 }
 
