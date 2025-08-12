@@ -6,7 +6,6 @@
 
 namespace Init
 {
-    //ver lo de poner el numero de mina en el placement
     static constexpr int kMinBoardSize = 24;
     static constexpr int kMaxBoardSize = 50;
     static constexpr int kMinMines = 3;
