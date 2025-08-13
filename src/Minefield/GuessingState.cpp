@@ -4,58 +4,55 @@
 #include <Minefield/init.h>
 #include <iostream>
 
-
-bool getGuessCoordinates(int& x, int& y, Board const& board)
+namespace guessUtils
 {
-    std::cout << "Enter X: ";
-
-    std::cin >> x;
-    std::cout << "Enter Y: ";
-    std::cin >> y;
-
-    return (y >= 1 && y <= static_cast<int>(board.grid.size()) && x >= 1 && x <= static_cast<int>(board.grid[0].size()));
-}
-
-
-bool isDuplicateGuess(Player const& player, Cell const& guess)
-{
-    for (Cell const &g : player.guesses)
+    bool getGuessCoordinates(int& x, int& y, Board const& board)
     {
-        if (cellMatches(g, guess))
-        {
-            std::cout << "You already guessed that. Try again.\n";
-                return true; // Found a duplicate guess
-        }
+        std::cout << "Enter X: ";
+
+        std::cin >> x;
+        std::cout << "Enter Y: ";
+        std::cin >> y;
+
+        return (y >= 1 && y <= static_cast<int>(board.grid.size()) && x >= 1 && x <= static_cast<int>(board.grid[0].size()));
     }
-    return false; // No duplicate found
-}
-void guess(Player& player, int& guesses, Game& game)
-{
-    std::cout << "Player " << player.id << ": You have " << guesses << " guesses. \n";
+
+
+    bool isDuplicateGuess(Player const& player, Cell const& guess)
+    {
+        for (Cell const& g : player.guesses)
+        {
+            if (resolutionUtils::cellMatches(g, guess))
+            {
+                std::cout << "You already guessed that. Try again.\n";
+                return true; // Found a duplicate guess
+            }
+        }
+        return false; // No duplicate found
+    }
+    void guess(Player & player, int& guesses, Game& game)
+    {
+        std::cout << "Player " << player.id << ": You have " << guesses << " guesses. \n";
 
         while (player.guesses.size() < static_cast<size_t>(guesses))
-    {
-        int x = 0;
-        int y = 0;
-
-        if (!getGuessCoordinates(x, y, game.context.board))
         {
-            std::cout << "Invalid guess location. Try again.\n";
-            continue;
-        }
-        {
-            std::cout << "Invalid guess location. Try again.\n";
+            int x = 0;
+            int y = 0;
+            std::cout << "\nGuess #" << (player.guesses.size() + 1) << " of " << guesses << "\n";
+            if (!getGuessCoordinates(x, y, game.context.board))
+            {
+                std::cout << "Invalid guess location. Try again.\n";
                 continue;
-        }
+            }
+            Cell guess{x, y, CellStatus::Guess};
 
-        Cell guess{x, y, CellStatus::Guess};
-
-        if (!isDuplicateGuess(player, guess))
-        {
-            player.guesses.push_back(guess); // add the guess if it's valid and not a duplicate
+            if (!isDuplicateGuess(player, guess))
+            {
+                player.guesses.push_back(guess); // add the guess if it's valid and not a duplicate
+            }
         }
     }
-}
+}//namespace guessUtils
 void GuessingState::handle(Game& game)
 {
     std::cout << "\n--- Guessing Phase ---\n";
@@ -63,11 +60,11 @@ void GuessingState::handle(Game& game)
     game.context.player1.guesses.clear();
     game.context.player2.guesses.clear();
 
-    int guesses1 = game.context.player1.mines.size();
-    int guesses2 = game.context.player2.mines.size();
+    int guesses1 = game.context.player2.mines.size();
+    int guesses2 = game.context.player1.mines.size();
 
-    guess(game.context.player1, guesses1, game);
-    guess(game.context.player2, guesses2, game);
+    guessUtils::guess(game.context.player1, guesses1, game);
+    guessUtils::guess(game.context.player2, guesses2, game);
 
     game.logic.setState(std::make_unique<ResolutionState>());
 }

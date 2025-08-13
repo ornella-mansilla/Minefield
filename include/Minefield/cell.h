@@ -11,16 +11,13 @@ enum class CellStatus : char
 
 struct Cell
 {
-
     int x;
     int y;
     CellStatus status;
-
-    void setStatus(CellStatus newStatus);
-    CellStatus getStatus() const;
-    bool isCellTaken() const;
-    char getCellSymbol() const;
 };
+
+bool isCellTaken(Cell const& cell);
+char getCellSymbol(Cell const& cell);
 
 
 
