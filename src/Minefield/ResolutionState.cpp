@@ -74,20 +74,29 @@ namespace resolutionUtils
 
     void processGuesses(std::string const& attackerName, Player& attacker, Player& defender, Board& board)
     {
-        // check if the attacker hit any mines of the defender
-        checkHits(attackerName, attacker, defender);
-        // check if the attacker guessed where he had a mine
-        checkSelfDamage(attacker);
+        // before modify mines' lists
+        auto const defenderMinesBefore = defender.mines;
+        auto const attackerMinesBefore = attacker.mines;
 
-        // mark guessed cells as "Taken"
+        // update board if there was a mine
         for (auto const& guess : attacker.guesses)
         {
-            int gx = guess.x - 1;
-            int gy = guess.y - 1;
-            board.grid[gy][gx].status = CellStatus::Taken;
-        }
-    }
+            bool hitMine = std::any_of(defenderMinesBefore.begin(), defenderMinesBefore.end(), [&guess](Mine const& m) { return cellMatches(m.location, guess); })
+                  || std::any_of(attackerMinesBefore.begin(), attackerMinesBefore.end(), [&guess](Mine const& m) { return cellMatches(m.location, guess); });
 
+            // indexes to 0-based
+            auto gy = static_cast<size_t>(guess.y - 1);
+            auto gx = static_cast<size_t>(guess.x - 1);
+            if (gy < board.grid.size() && gx < board.grid[gy].size())
+            {
+                board.grid[gy][gx].status = hitMine ? CellStatus::Taken : CellStatus::Empty;
+            }
+        }
+
+        // now apply effects to lists (remove destroyed mines, self-damage, etc)
+        checkHits(attackerName, attacker, defender);
+        checkSelfDamage(attacker);
+    }
 
     std::vector<Mine> removeOverlaps(std::vector<Mine> const& mines, std::vector<Mine> const& otherMines)
     {

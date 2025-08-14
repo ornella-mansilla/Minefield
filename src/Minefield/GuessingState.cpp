@@ -1,7 +1,9 @@
 #include <Minefield/GameContext.h>
 #include <Minefield/GuessingState.h>
 #include <Minefield/ResolutionState.h>
+#include <Minefield/board.h>
 #include <Minefield/init.h>
+#include <Minefield/cell.h>
 #include <iostream>
 
 namespace guessUtils
@@ -39,16 +41,17 @@ namespace guessUtils
             int x = 0;
             int y = 0;
             std::cout << "\nGuess #" << (player.guesses.size() + 1) << " of " << guesses << "\n";
-            if (!getGuessCoordinates(x, y, game.context.board))
+            if (!getGuessCoordinates(x, y, game.context.board) || isCellTaken(Cell{x,y}))
             {
                 std::cout << "Invalid guess location. Try again.\n";
                 continue;
             }
             Cell guess{x, y, CellStatus::Guess};
-
+            
             if (!isDuplicateGuess(player, guess))
             {
                 player.guesses.push_back(guess); // add the guess if it's valid and not a duplicate
+                game.context.board.grid[y-1][x-1] = guess; // 
             }
         }
     }
@@ -64,7 +67,9 @@ void GuessingState::handle(Game& game)
     int guesses2 = game.context.player1.mines.size();
 
     guessUtils::guess(game.context.player1, guesses1, game);
+    BoardUtils::printBoardPerPlayer(game.context.board, game.context.player1);
     guessUtils::guess(game.context.player2, guesses2, game);
+    BoardUtils::printBoardPerPlayer(game.context.board, game.context.player2);
 
     game.logic.setState(std::make_unique<ResolutionState>());
 }
