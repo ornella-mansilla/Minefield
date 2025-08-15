@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include "strongType.h"
+#include "player.h"
 #include "GameState.h"
 
 class ResolutionState : public game::State
@@ -8,12 +10,13 @@ public:
     void handle(Game& game) override;
 
 };
+
 namespace resolutionUtils
 {
     bool cellMatches(Cell const& a, Cell const& b);
-    void checkHits(std::string const& attackerName, Player& attacker, Player& defender);
-    void checkSelfDamage(Player& attacker);
-    void processGuesses(std::string const& attackerName, Player& attacker, Player& defender, Board& board);
-    std::vector<Mine> removeOverlaps(std::vector<Mine> const& mines, std::vector<Mine> const& otherMines);
-    void removeOverlappingMines(Player& p1, Player& p2);
+    bool isHitSuccessful(std::string const& attackerName, playerTypes::Attacker attacker, playerTypes::Defender defender);
+    bool selfDamage(playerTypes::Attacker attacker);
+    void processGuesses(std::string const& attackerName, playerTypes::Attacker attacker, playerTypes::Defender defender, Board& board);
+    std::vector<Mine> getMinesWithoutOverlaps(std::vector<Mine> const& playerMines, std::vector<Mine> const& otherPlayerMines);
+    void removeOverlappingMines(playerTypes::Player1 p1, playerTypes::Player2 p2);
 }

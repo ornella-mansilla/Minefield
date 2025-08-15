@@ -13,13 +13,30 @@ namespace resolutionUtils
         return a.x == b.x && a.y == b.y;
     }
 
-    void checkHits(std::string const& attackerName, Player& attacker, Player& defender)
+    void saveDestroyedMines(auto const& updatedMines, playerTypes::Attacker attacker, playerTypes::Defender defender)
+    {
+        bool saved = true;
+        for (Mine const& oldMine : defender.raw().mines)
+        {
+            bool wasDestroyed
+                = std::none_of(updatedMines.begin(), updatedMines.end(), [&oldMine](Mine const& m) { return cellMatches(m.location, oldMine.location); });
+
+            if (wasDestroyed)
+            {
+                defender.raw().disabledMineSpots.push_back(oldMine.location);
+            }
+        }
+
+        defender.raw().mines = updatedMines;
+    }
+    
+    bool isHitSuccessful(std::string const& attackerName, playerTypes::Attacker attacker, playerTypes::Defender defender)
     {
         std::vector<Mine> updatedMines;
-        for (auto const& mine : defender.mines)
+        bool hit = false;
+        for (Mine const& mine : defender.raw().mines)
         {
-            bool hit = false;
-            for (auto const& guess : attacker.guesses)
+            for (Cell const& guess : attacker.raw().guesses)
             {
                 if (cellMatches(mine.location, guess))
                 {
@@ -33,32 +50,22 @@ namespace resolutionUtils
                 updatedMines.push_back(mine);
             }
         }
-
-        // save destroyed mines
-        for (auto const& oldMine : defender.mines)
-        {
-            bool wasDestroyed = std::none_of(updatedMines.begin(), updatedMines.end(), [&oldMine](Mine const& m) { return cellMatches(m.location, oldMine.location); });
-
-            if (wasDestroyed)
-            {
-                defender.disabledMineSpots.push_back(oldMine.location);
-            }
-        }
-
-        defender.mines = updatedMines;
+        saveDestroyedMines(updatedMines, attacker, defender);
+        return hit;
     }
-    void checkSelfDamage(Player & attacker)
+
+    bool selfDamage(playerTypes::Attacker attacker)
     {
         std::vector<Mine> updatedOwnMines;
-        for (auto const& mine : attacker.mines)
+        bool selfHit = false;
+        for (Mine const& mine : attacker.raw().mines)
         {
-            bool selfHit = false;
-            for (auto const& guess : attacker.guesses)
+            for (Cell const& guess : attacker.raw().guesses)
             {
                 if (cellMatches(mine.location, guess))
                 {
                     std::cout << "Oops! You guessed your own mine at (" << mine.location.x << ", " << mine.location.y << ")\n";
-                    attacker.disabledMineSpots.push_back(mine.location);
+                    attacker.raw().disabledMineSpots.push_back(mine.location);
                     selfHit = true;
                     break;
                 }
@@ -69,17 +76,18 @@ namespace resolutionUtils
             }
         }
 
-        attacker.mines = updatedOwnMines;
+        attacker.raw().mines = updatedOwnMines;
+        return selfHit;
     }
 
-    void processGuesses(std::string const& attackerName, Player& attacker, Player& defender, Board& board)
+    void processGuesses(std::string const& attackerName, playerTypes::Attacker attacker, playerTypes::Defender defender, Board& board)
     {
         // before modify mines' lists
-        auto const defenderMinesBefore = defender.mines;
-        auto const attackerMinesBefore = attacker.mines;
+        auto const defenderMinesBefore = defender.raw().mines;
+        auto const attackerMinesBefore = attacker.raw().mines;
 
         // update board if there was a mine
-        for (auto const& guess : attacker.guesses)
+        for (auto const& guess : attacker.raw().guesses)
         {
             bool hitMine = std::any_of(defenderMinesBefore.begin(), defenderMinesBefore.end(), [&guess](Mine const& m) { return cellMatches(m.location, guess); })
                   || std::any_of(attackerMinesBefore.begin(), attackerMinesBefore.end(), [&guess](Mine const& m) { return cellMatches(m.location, guess); });
@@ -94,17 +102,16 @@ namespace resolutionUtils
         }
 
         // now apply effects to lists (remove destroyed mines, self-damage, etc)
-        checkHits(attackerName, attacker, defender);
-        checkSelfDamage(attacker);
+        isHitSuccessful(attackerName, attacker, defender);
+        selfDamage(attacker);
     }
 
-    std::vector<Mine> removeOverlaps(std::vector<Mine> const& mines, std::vector<Mine> const& otherMines)
+    std::vector<Mine> getMinesWithoutOverlaps(std::vector<Mine> const& playerMines, std::vector<Mine> const& otherPlayerMines)
     {
         std::vector<Mine> cleaned;
-        for (Mine const& m : mines)
+        for (Mine const& m : playerMines)
         {
-            bool overlap = std::any_of(
-                otherMines.begin(), otherMines.end(), [&m](Mine const& other) { return cellMatches(m.location, other.location); });
+            bool overlap = std::any_of(otherPlayerMines.begin(), otherPlayerMines.end(), [&m](Mine const& other) { return cellMatches(m.location, other.location); });
             if (!overlap)
             {
                 cleaned.push_back(m);
@@ -113,18 +120,18 @@ namespace resolutionUtils
         return cleaned;
     }
 
-    void removeOverlappingMines(Player & p1, Player & p2)
+    void removeOverlappingMines(playerTypes::Player1 p1, playerTypes::Player2 p2)
     {
-        auto p1Cleaned = removeOverlaps(p1.mines, p2.mines);
-        auto p2Cleaned = removeOverlaps(p2.mines, p1.mines);
+        auto p1Cleaned = getMinesWithoutOverlaps(p1.raw().mines, p2.raw().mines);
+        auto p2Cleaned = getMinesWithoutOverlaps(p2.raw().mines, p1.raw().mines);
 
-        if (p1.mines.size() != p1Cleaned.size() || p2.mines.size() != p2Cleaned.size())
+        if (p1.raw().mines.size() != p1Cleaned.size() || p2.raw().mines.size() != p2Cleaned.size())
         {
             std::cout << "Some overlapping mines were neutralized!\n";
         }
 
-        p1.mines = std::move(p1Cleaned);
-        p2.mines = std::move(p2Cleaned);
+        p1.raw().mines = std::move(p1Cleaned);
+        p2.raw().mines = std::move(p2Cleaned);
     }
 }//namespace resolutionUtils
 
@@ -135,7 +142,7 @@ void ResolutionState::handle(Game& game)
 
     resolutionUtils::removeOverlappingMines(game.context.player1, game.context.player2);
 
-    resolutionUtils::processGuesses("Player 1", game.context.player1, game.context.player2, game.context.board);
+    resolutionUtils::processGuesses("Player 1", playerTypes::Attacker{game.context.player1}, playerTypes::Defender{game.context.player2}, game.context.board);
     resolutionUtils::processGuesses("Player 2", game.context.player2, game.context.player1, game.context.board);
 
     // update remaining mines
