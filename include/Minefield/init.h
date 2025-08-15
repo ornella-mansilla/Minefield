@@ -5,7 +5,6 @@
 namespace Init
 {
     bool rangeValidation(int size);
-    //std::vector<int> initializeAxis(int size);
     bool minesValidation(int count);
     int getBoardDimension(std::string const& axisName);
     int readMineCount();
