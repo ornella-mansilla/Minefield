@@ -6,21 +6,16 @@
 
 namespace Init
 {
-    static constexpr int kMinBoardSize = 24;
-    static constexpr int kMaxBoardSize = 50;
-    static constexpr int kMinMines = 3;
-    static constexpr int kMaxMines = 8;
+    bool isBoardSizeValid(int size) { return size > kMinBoardSize && size <= kMaxBoardSize; }
 
-    bool rangeValidation(int size) { return size > kMinBoardSize && size <= kMaxBoardSize; }
-
-    bool minesValidation(int count) { return count >= kMinMines && count <= kMaxMines; }
+    bool isMineCountValid(int count) { return count >= kMinMines && count <= kMaxMines; }
 
     int getBoardDimension(std::string const &axisName)
     {
         int size = 0;
         std::cout << "Enter number of " << axisName << " (between 25 and 50): ";
         std::cin >> size;
-        while (!rangeValidation(size))
+        while (!isBoardSizeValid(size))
         {
             std::cout << "Invalid value. Please try again: ";
             std::cin >> size;
@@ -33,7 +28,7 @@ namespace Init
         int count = 0;
         std::cout << "Enter number of mines (between 3 and 8): ";
         std::cin >> count;
-        while (!minesValidation(count))
+        while (!isMineCountValid(count))
         {
             std::cout << "Invalid value. Please try again: ";
             std::cin >> count;
