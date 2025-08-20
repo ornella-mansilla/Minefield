@@ -13,16 +13,11 @@ struct Player
 };
 namespace playerTypes
 {
-    struct AttackerTag{};
-    struct DefenderTag{};
-    struct Player1Tag{};
-    struct Player2Tag{};
-
-    using Attacker = StrongType<Player&, AttackerTag>;
-    using Defender = StrongType<Player&, DefenderTag>;
-    using Player1 = StrongType<Player&, Player1Tag>;
-    using Player2 = StrongType<Player&, Player2Tag>;
-}
+    using Attacker = StrongType<Player&, struct AttackerTag>;
+    using Defender = StrongType<Player&, struct DefenderTag>;
+    using Player1 = StrongType<Player&, struct Player1Tag>;
+    using Player2 = StrongType<Player&, struct Player2Tag>;
+} // namespace playerTypes
 struct Mine
 {
     Cell location;

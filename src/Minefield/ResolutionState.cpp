@@ -140,10 +140,10 @@ void ResolutionState::handle(Game& game)
 
     std::cout << "\n--- Resolution Phase ---\n";
 
-    resolutionUtils::removeOverlappingMines(game.context.player1, game.context.player2);
+    resolutionUtils::removeOverlappingMines(playerTypes::Player1{game.context.player1}, playerTypes::Player2{game.context.player2});
 
     resolutionUtils::processGuesses("Player 1", playerTypes::Attacker{game.context.player1}, playerTypes::Defender{game.context.player2}, game.context.board);
-    resolutionUtils::processGuesses("Player 2", game.context.player2, game.context.player1, game.context.board);
+    resolutionUtils::processGuesses("Player 2", playerTypes::Attacker{game.context.player2}, playerTypes::Defender{game.context.player1}, game.context.board);
 
     // update remaining mines
     game.context.player1.remainingMines = game.context.player1.mines.size();
