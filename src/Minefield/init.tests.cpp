@@ -68,5 +68,4 @@ namespace init::tests
     {
         EXPECT_FALSE(Init::isMineCountValid(-1));
     }
-
-    }
+}
