@@ -5,42 +5,42 @@
 
 namespace guessingState::tests
 {
-static Player makeBasePlayer()
+class GuessingStateSuite : public ::testing::Test
 {
-    Cell guessA{1, 1, CellStatus::Empty};
-    Cell guessB{2, 2, CellStatus::Bomb};
-    Player testPlayer;
-    testPlayer.id = 1;
-    testPlayer.guesses.push_back(guessA);
-    testPlayer.guesses.push_back(guessB);
-    return testPlayer;
+protected:
+    void SetUp() override
+    {
+        cellInPlayerGuesses = {3, 3, CellStatus::Bomb};
+        cellWithExactlySameInfoAsPlayerGuess = {3, 3, CellStatus::Bomb};
+        cellWithSameCoordinatesAsPlayerGuessButDifferentStatus = {3, 3, CellStatus::Empty};
+        cellOutOfPlayerGuesses = {6, 7, CellStatus::Guess};
+        player.guesses.push_back(cellInPlayerGuesses);
+    }
+    std::string const playerName = static_cast<std::string>("testPlayer");
+    Player player;
+    Cell cellInPlayerGuesses;
+    Cell cellWithExactlySameInfoAsPlayerGuess;
+    Cell cellWithSameCoordinatesAsPlayerGuessButDifferentStatus;
+    Cell cellOutOfPlayerGuesses;
+};
+TEST_F(GuessingStateSuite, should_return_false_if_guess_is_not_in_player_guesses)
+{
+    EXPECT_FALSE(guessUtils::isDuplicateGuess(player, cellOutOfPlayerGuesses));
 }
 
-TEST(GuessingState, should_return_false_if_guess_is_not_in_player_guesses)
+TEST_F(GuessingStateSuite, should_detect_a_cell_thats_already_in_player_guesses)
 {
-    Cell anotherGuess{8, 8, CellStatus::Bomb};
-    auto player = makeBasePlayer();
-    EXPECT_FALSE(guessUtils::isDuplicateGuess(player, anotherGuess));
-}
-
-TEST(GuessingState, should_detect_a_cell_thats_already_in_player_guesses)
-{
-    auto player = makeBasePlayer();
     Cell const& guessAlreadyMade = player.guesses.front();
     EXPECT_TRUE(guessUtils::isDuplicateGuess(player, guessAlreadyMade));
 }
 
-TEST(GuessingState, should_detect_a_cell_that_has_same_info_as_a_previous_cell)
+TEST_F(GuessingStateSuite, should_detect_a_cell_that_has_same_info_as_a_previous_cell)
 {
-    Cell duplicatedGuess{1, 1, CellStatus::Empty};
-    auto player = makeBasePlayer();
-    EXPECT_TRUE(guessUtils::isDuplicateGuess(player, duplicatedGuess));
+    EXPECT_TRUE(guessUtils::isDuplicateGuess(player, cellWithExactlySameInfoAsPlayerGuess));
 }
 
-TEST(GuessingState, should_detect_a_cell_that_has_same_coordinates_as_a_previous_cell_but_different_status)
+TEST_F(GuessingStateSuite, should_detect_a_cell_that_has_same_coordinates_as_a_previous_cell_but_different_status)
 {
-    Cell similarGuess{2, 2, CellStatus::Taken};
-    auto player = makeBasePlayer();
-    EXPECT_TRUE(guessUtils::isDuplicateGuess(player, similarGuess));
+    EXPECT_TRUE(guessUtils::isDuplicateGuess(player, cellWithSameCoordinatesAsPlayerGuessButDifferentStatus));
 }
 } // namespace guessingState::tests
