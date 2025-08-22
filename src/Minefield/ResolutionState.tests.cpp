@@ -12,8 +12,6 @@ protected:
         guessMineB = {2,2,CellStatus::Bomb};
         guessMineC = {3,3,CellStatus::Bomb};
         emptyGuess = {4,5,CellStatus::Empty};
-        wrongGuess = {6,7,CellStatus::Guess};
-        takenGuess = {8,8,CellStatus::Taken};
     }
 
     std::string const playerName = static_cast<std::string>("testPlayer");
@@ -29,8 +27,6 @@ protected:
     Cell guessMineB;
     Cell guessMineC;
     Cell emptyGuess;
-    Cell wrongGuess;
-    Cell takenGuess;
 };
 
 using namespace resolutionUtils;
