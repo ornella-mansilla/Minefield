@@ -2,16 +2,45 @@
 #include <Minefield/cell.h>
 namespace cell::tests
 {
-    //TEST(OrnellaSuiteTest, dummy_test)
-    //{
-    //    EXPECT_TRUE(true, true);
-    //}
-
-    TEST(Cell, should_not_declare_a_cell_as_taken_by_default)
+    TEST(isCellTaken, should_detect_a_taken_cell)
     {
-        Cell cell;
-       /* cell.status = CellStatus::Taken;*/
-        EXPECT_FALSE(isCellTaken(cell)) << "A new Cell should not be marked as taken by default";
+        Cell cell{1,1,CellStatus::Taken};
+        EXPECT_TRUE(isCellTaken(cell));
     }
 
-}
+    TEST(isCellTaken, coordinate_values_should_not_affect_function_result)
+    {
+        Cell cell{-10, 9999, CellStatus::Taken};
+        EXPECT_TRUE(isCellTaken(cell));
+    }
+
+    TEST(isCellTaken, should_not_treat_bomb_as_taken)
+    {
+        Cell cell{1, 1, CellStatus::Bomb};
+        EXPECT_FALSE(isCellTaken(cell));
+    }
+
+    TEST(isCellTaken, should_not_treat_empty_as_taken)
+    {
+        Cell cell{1, 1, CellStatus::Empty};
+        EXPECT_FALSE(isCellTaken(cell));
+    }
+
+    TEST(isCellTaken, should_not_treat_guess_as_taken)
+    {
+        Cell cell{1, 1, CellStatus::Guess};
+        EXPECT_FALSE(isCellTaken(cell));
+    }
+
+    TEST(getCellSymbol, should_bring_same_cell_symbol)
+    {
+        Cell cell{1, 1, CellStatus::Taken};
+        EXPECT_TRUE(getCellSymbol(cell) == static_cast<char>(CellStatus::Taken));
+    }
+
+    TEST(getCellSymbol, should_not_bring_anything_else_but_the_original_symbol)
+    {
+        Cell cell{1, 1, CellStatus::Empty};
+        EXPECT_FALSE(getCellSymbol(cell) != static_cast<char>(CellStatus::Empty));
+    }
+    }
